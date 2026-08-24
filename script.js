@@ -165,8 +165,9 @@ class AnimationObserver {
 
 // ===== CONTACT FORM HANDLING =====
 class ContactForm {
-  constructor() {
+  constructor(validator) {
     this.form = document.getElementById('contactForm');
+    this.validator = validator;
     this.init();
   }
 
@@ -180,6 +181,11 @@ class ContactForm {
   }
 
   handleSubmit() {
+    if (this.validator && !this.validator.validateForm()) {
+      this.showMessage('Controleer de gemarkeerde velden hierboven.', 'error');
+      return;
+    }
+
     // Get form data
     const formData = new FormData(this.form);
     const data = Object.fromEntries(formData);
@@ -238,9 +244,14 @@ class FormValidation {
 
   validateField(field) {
     const value = field.value.trim();
-    
+
     if (field.hasAttribute('required') && !value) {
       this.showError(field, 'Dit veld is verplicht');
+      return false;
+    }
+
+    if (field.id === 'name' && value && value.length < 2) {
+      this.showError(field, 'Voer je volledige naam in');
       return false;
     }
 
@@ -252,8 +263,43 @@ class FormValidation {
       }
     }
 
+    if (field.type === 'tel' && value) {
+      const phoneRegex = /^[+]?[\d\s()-]{8,20}$/;
+      if (!phoneRegex.test(value)) {
+        this.showError(field, 'Voer een geldig telefoonnummer in');
+        return false;
+      }
+    }
+
+    if (field.id === 'message' && value && value.length < 10) {
+      this.showError(field, 'Geef iets meer uitleg in je bericht (minimaal 10 tekens)');
+      return false;
+    }
+
     this.clearError(field);
     return true;
+  }
+
+  validateForm() {
+    const inputs = this.form.querySelectorAll('input, textarea');
+    let isValid = true;
+    let firstInvalidField = null;
+
+    inputs.forEach(input => {
+      const fieldIsValid = this.validateField(input);
+      if (!fieldIsValid) {
+        isValid = false;
+        if (!firstInvalidField) {
+          firstInvalidField = input;
+        }
+      }
+    });
+
+    if (firstInvalidField) {
+      firstInvalidField.focus();
+    }
+
+    return isValid;
   }
 
   showError(field, message) {
@@ -359,8 +405,8 @@ document.addEventListener('DOMContentLoaded', () => {
   new ActiveNavigation();
   new NavbarScrollEffect();
   new AnimationObserver();
-  new ContactForm();
-  new FormValidation();
+  const formValidation = new FormValidation();
+  new ContactForm(formValidation);
   new ScrollToTop();
 
   // Log success message
