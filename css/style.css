@@ -435,10 +435,10 @@ a {
 }
 
 .team-member-small {
-  background: var(--wit);
+  /* background: var(--wit); */
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 5px 25px var(--shadow);
+  /* box-shadow: 0 5px 25px var(--shadow); */
   transition: var(--transition);
   display: flex;
   /* flex-direction: column; */
