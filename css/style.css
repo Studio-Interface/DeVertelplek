@@ -341,17 +341,19 @@ a {
 }
 
 .about-content {
+  display: block;
+}
+
+/* Missie & Visie naast elkaar op desktop, zonder blokkerige achtergrond */
+.about-text {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4rem;
-  align-items: center;
+  align-items: start;
 }
 
 .text-block {
-  background: var(--zandbeige);
-  padding: 2rem;
-  border-radius: 20px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
 }
 
 .text-block h3 {
@@ -453,8 +455,7 @@ a {
 
 .team-photo-small {
   width: 180px;
-  height: 180px;
-  background: linear-gradient(135deg, var(--perzik) 0%, var(--okergeel) 100%);
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -472,9 +473,9 @@ a {
   justify-content: center;
 }
 
-.team-photo-small .photo-placeholder svg {
-  width: 150px;
-  height: 150px;
+.team-photo-small .photo-placeholder img {
+  width: 100%;
+  height: auto;
 }
 
 .team-info-small {
@@ -817,6 +818,11 @@ a {
   margin-bottom: 1.75rem;
 }
 
+.klacht-tekst span {
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
 /* ===== CONTACT SECTION ===== */
 .contact {
   padding: var(--section-padding);
@@ -1078,9 +1084,9 @@ a {
   }
   
   /* About */
-  .about-content {
+  .about-text {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 2.5rem;
   }
   
   .image-placeholder svg {
@@ -1208,7 +1214,6 @@ a {
     font-size: 1.75rem;
   }
   
-  .text-block,
   .step-card,
   .info-box,
   .contact-card {
