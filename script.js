@@ -3,12 +3,16 @@ class MobileNavigation {
   constructor() {
     this.toggle = document.getElementById('mobileToggle');
     this.menu = document.getElementById('navMenu');
+    this.navbar = document.getElementById('navbar');
     this.links = document.querySelectorAll('.nav-link');
     this.init();
   }
 
   init() {
     if (!this.toggle || !this.menu) return;
+
+    this.toggle.setAttribute('aria-controls', 'navMenu');
+    this.toggle.setAttribute('aria-expanded', 'false');
 
     // Toggle menu on button click
     this.toggle.addEventListener('click', () => this.toggleMenu());
@@ -24,16 +28,46 @@ class MobileNavigation {
         this.closeMenu();
       }
     });
+
+    // Close menu on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') this.closeMenu();
+    });
+
+    // Close menu when resizing to desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) this.closeMenu();
+    });
   }
 
   toggleMenu() {
-    this.menu.classList.toggle('active');
-    this.toggle.classList.toggle('active');
+    if (this.menu.classList.contains('active')) {
+      this.closeMenu();
+    } else {
+      this.openMenu();
+    }
+  }
+
+  openMenu() {
+    this.menu.classList.add('active');
+    this.toggle.classList.add('active');
+    this.toggle.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('menu-open');
+
+    // Header vastzetten zodat het menu er netjes onder blijft hangen
+    if (this.navbar) {
+      this.navbar.classList.remove('hidden');
+      this.navbar.classList.add('menu-open');
+    }
   }
 
   closeMenu() {
     this.menu.classList.remove('active');
     this.toggle.classList.remove('active');
+    this.toggle.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('menu-open');
+
+    if (this.navbar) this.navbar.classList.remove('menu-open');
   }
 }
 
@@ -105,33 +139,61 @@ class ActiveNavigation {
 class NavbarScrollEffect {
   constructor() {
     this.navbar = document.getElementById('navbar');
-    this.lastScrollY = 0;
+    this.lastScrollY = window.scrollY;
+    this.navHeight = 0;
     this.init();
   }
 
   init() {
     if (!this.navbar) return;
 
-    window.addEventListener('scroll', () => {
-      const currentScrollY = window.scrollY;
-      const isScrollingDown = currentScrollY > this.lastScrollY;
+    this.updateNavHeight();
+    window.addEventListener('load', () => this.updateNavHeight());
+    window.addEventListener('resize', () => this.updateNavHeight());
+    window.addEventListener('scroll', () => this.handleScroll(), { passive: true });
 
-      // Add scrolled class when scrolled down
-      if (currentScrollY > 100) {
-        this.navbar.classList.add('scrolled');
-      } else {
-        this.navbar.classList.remove('scrolled');
-      }
+    this.handleScroll();
+  }
 
-      // Hide navbar when scrolling down, show when scrolling up
-      if (isScrollingDown) {
-        this.navbar.classList.add('hidden');
-      } else {
-        this.navbar.classList.remove('hidden');
-      }
+  // Hoogte van de header doorgeven aan de CSS (gebruikt door het mobiele menu)
+  updateNavHeight() {
+    this.navHeight = this.navbar.offsetHeight;
+    document.documentElement.style.setProperty('--nav-height', `${this.navHeight}px`);
+  }
 
+  handleScroll() {
+    const currentScrollY = window.scrollY;
+    const isScrollingDown = currentScrollY > this.lastScrollY;
+    const isPinned = this.navbar.classList.contains('scrolled');
+
+    // Niets veranderen zolang het mobiele menu open staat
+    if (this.navbar.classList.contains('menu-open')) {
       this.lastScrollY = currentScrollY;
-    });
+      return;
+    }
+
+    if (currentScrollY <= 0) {
+      // Bovenaan de pagina: header hoort weer bij de hero en schuift mee
+      this.navbar.classList.remove('scrolled', 'hidden');
+    } else if (!isPinned) {
+      // Header schuift mee met de hero en mag pas terugkomen
+      // wanneer hij volledig uit beeld is gescrold
+      if (currentScrollY > this.navHeight) {
+        this.pinNavbar();
+      }
+    } else {
+      // Vastgezette header: verbergen bij omlaag scrollen, tonen bij omhoog
+      this.navbar.classList.toggle('hidden', isScrollingDown);
+    }
+
+    this.lastScrollY = currentScrollY;
+  }
+
+  // Overschakelen naar de vaste header: start buiten beeld, zonder zichtbare sprong
+  pinNavbar() {
+    this.navbar.classList.add('no-transition', 'scrolled', 'hidden');
+    void this.navbar.offsetHeight; // forceer een reflow
+    this.navbar.classList.remove('no-transition');
   }
 }
 

@@ -143,6 +143,26 @@ a {
   transform: translateY(-100%);
 }
 
+/* Geen animatie op het moment dat de header van meescrollen naar vast overschakelt */
+.nav.no-transition {
+  transition: none;
+}
+
+/* Header vastzetten zolang het mobiele menu open staat (moet na .hidden staan) */
+.nav.menu-open {
+  position: fixed;
+  top: 0;
+  transform: none;
+}
+
+.nav.menu-open .logo img {
+  filter: brightness(1);
+}
+
+body.menu-open {
+  overflow: hidden;
+}
+
 .nav-wrapper {
   display: flex;
   justify-content: space-between;
@@ -217,6 +237,19 @@ a {
   background: var(--mosgroen);
   border-radius: 3px;
   transition: var(--transition);
+  transform-origin: center;
+}
+
+.mobile-toggle.active span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.mobile-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-toggle.active span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
 }
 
 /* ===== HERO SECTION ===== */
@@ -288,6 +321,7 @@ a {
 }
 
 .hero-title {
+  font-size: clamp(2.75rem, 5.5vw, 4.5rem);
   margin-bottom: 1.5rem;
 }
 
@@ -295,7 +329,8 @@ a {
   font-size: 1.25rem;
   color: var(--mosgroen);
   opacity: 0.9;
-  margin-bottom: 3rem;
+  max-width: 850px;
+  margin: 0 auto 3rem;
   line-height: 1.8;
 }
 
@@ -365,6 +400,21 @@ a {
 .text-block p {
   margin-bottom: 0;
   line-height: 1.8;
+}
+
+/* Citaat onder Missie & Visie, gecentreerd */
+.about-quote {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.about-quote em {
+  display: inline-block;
+  max-width: 600px;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--mosgroen);
 }
 
 .about-image {
@@ -694,7 +744,7 @@ a {
 
 .tarieven-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 2rem;
   margin-bottom: 3rem;
 }
@@ -1030,25 +1080,35 @@ a {
     max-width: 280px;
   }
   
+  /* Logo en hamburger blijven boven het uitgeschoven menu liggen */
+  .nav-wrapper {
+    position: relative;
+    z-index: 2;
+  }
+  
   .nav-menu {
     position: fixed;
-    top: 60px;
+    top: 0;
     left: 0;
     width: 100%;
-    height: 0;
+    z-index: 1;
+    max-height: 100vh;
+    overflow-y: auto;
     background: var(--wit);
     flex-direction: column;
     justify-content: flex-start;
-    padding: 0 2rem;
+    align-items: stretch;
     gap: 0;
-    box-shadow: 0 5px 20px var(--shadow);
-    transition: height 0.3s ease;
-    overflow: hidden;
+    padding: calc(var(--nav-height, 5rem) + 1rem) 1.5rem 2rem;
+    box-shadow: 0 10px 30px var(--shadow);
+    transform: translateY(-100%);
+    visibility: hidden;
+    transition: transform 0.35s ease, visibility 0.35s ease;
   }
   
   .nav-menu.active {
-    height: auto;
-    padding: 2rem;
+    transform: translateY(0);
+    visibility: visible;
   }
   
   .nav-link {
@@ -1087,6 +1147,14 @@ a {
   .about-text {
     grid-template-columns: 1fr;
     gap: 2.5rem;
+  }
+  
+  .about-quote {
+    margin-top: 2.5rem;
+  }
+  
+  .about-quote em {
+    font-size: 1rem;
   }
   
   .image-placeholder svg {
@@ -1207,11 +1275,21 @@ a {
   }
   
   .hero-title {
-    font-size: 2rem;
+    font-size: 2.25rem;
   }
   
   .section-title {
     font-size: 1.75rem;
+  }
+  
+  .logo img {
+    width: 100%;
+    max-width: 200px;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    font-size: 16px;
   }
   
   .step-card,
