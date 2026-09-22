@@ -36,7 +36,7 @@ class MobileNavigation {
 
     // Close menu when resizing to desktop
     window.addEventListener('resize', () => {
-      if (window.innerWidth > 768) this.closeMenu();
+      if (window.innerWidth > 1200) this.closeMenu();
     });
   }
 
@@ -226,10 +226,18 @@ class AnimationObserver {
 }
 
 // ===== CONTACT FORM HANDLING =====
+const WEB3FORMS_ACCESS_KEY = 'key';
+
 class ContactForm {
   constructor(validator) {
     this.form = document.getElementById('contactForm');
     this.validator = validator;
+    this.submitBtn = document.getElementById('contactSubmit');
+    this.status = document.getElementById('formStatus');
+    this.statusTimer = null;
+    this.btnLabel = this.submitBtn ? this.submitBtn.querySelector('.btn-label') : null;
+    this.defaultLabel = this.btnLabel ? this.btnLabel.textContent : '';
+    this.isSending = false;
     this.init();
   }
 
@@ -242,47 +250,77 @@ class ContactForm {
     });
   }
 
-  handleSubmit() {
+  async handleSubmit() {
+    if (this.isSending) return;
+
     if (this.validator && !this.validator.validateForm()) {
       this.showMessage('Controleer de gemarkeerde velden hierboven.', 'error');
       return;
     }
 
-    // Get form data
     const formData = new FormData(this.form);
-    const data = Object.fromEntries(formData);
+    formData.append('access_key', WEB3FORMS_ACCESS_KEY);
+    formData.append('subject', `Nieuw bericht via de website van ${formData.get('name')}`);
+    formData.append('from_name', 'De Vertelplek website');
+    formData.append('replyto', formData.get('email'));
 
-    // Simulate form submission
-    console.log('Form data:', data);
+    this.setButtonState('sending');
 
-    // Show success message
-    this.showMessage('Bedankt voor je bericht! We nemen zo snel mogelijk contact met je op.', 'success');
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData
+      });
 
-    // Reset form
-    this.form.reset();
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        this.setButtonState('sent');
+        this.showMessage('Bedankt voor je bericht! We nemen zo snel mogelijk contact met je op.', 'success');
+        this.form.reset();
+
+        // Knop na een paar seconden terug in de normale staat
+        setTimeout(() => this.setButtonState('idle'), 5000);
+      } else {
+        this.setButtonState('idle');
+        this.showMessage(data.message || 'Het versturen is niet gelukt. Probeer het later opnieuw.', 'error');
+      }
+    } catch (error) {
+      this.setButtonState('idle');
+      this.showMessage('Er ging iets mis. Controleer je internetverbinding en probeer het opnieuw.', 'error');
+    }
+  }
+
+  setButtonState(state) {
+    if (!this.submitBtn || !this.btnLabel) return;
+
+    this.isSending = state === 'sending';
+    this.submitBtn.disabled = state === 'sending' || state === 'sent';
+    this.submitBtn.classList.toggle('is-sending', state === 'sending');
+    this.submitBtn.classList.toggle('is-sent', state === 'sent');
+
+    if (state === 'sending') {
+      this.btnLabel.textContent = 'Bezig met versturen...';
+    } else if (state === 'sent') {
+      this.btnLabel.textContent = 'Bericht verzonden';
+    } else {
+      this.btnLabel.textContent = this.defaultLabel;
+    }
   }
 
   showMessage(message, type) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `form-message ${type}`;
-    messageDiv.textContent = message;
-    messageDiv.style.cssText = `
-      padding: 1rem;
-      border-radius: 12px;
-      margin-top: 1rem;
-      text-align: center;
-      font-weight: 600;
-      background: ${type === 'success' ? '#F4C06A' : '#F5C6AA'};
-      color: white;
-      animation: fadeInUp 0.3s ease-out;
-    `;
+    if (!this.status) return;
 
-    this.form.appendChild(messageDiv);
+    clearTimeout(this.statusTimer);
 
-    // Remove message after 5 seconds
-    setTimeout(() => {
-      messageDiv.remove();
-    }, 5000);
+    // role="status" + aria-live zorgen dat schermlezers dit voorlezen
+    this.status.textContent = message;
+    this.status.className = `form-status is-visible ${type}`;
+
+    this.statusTimer = setTimeout(() => {
+      this.status.textContent = '';
+      this.status.className = 'form-status';
+    }, type === 'success' ? 8000 : 6000);
   }
 }
 
@@ -296,11 +334,9 @@ class FormValidation {
   init() {
     if (!this.form) return;
 
-    const inputs = this.form.querySelectorAll('input, textarea');
-    
-    inputs.forEach(input => {
-      input.addEventListener('blur', () => this.validateField(input));
-      input.addEventListener('input', () => this.clearError(input));
+    this.fields().forEach(field => {
+      field.addEventListener('blur', () => this.validateField(field));
+      field.addEventListener('input', () => this.clearError(field));
     });
   }
 
@@ -342,12 +378,16 @@ class FormValidation {
     return true;
   }
 
+  // Alle echte invoervelden (dus zonder de honeypot)
+  fields() {
+    return this.form.querySelectorAll('input:not(.form-honeypot), textarea');
+  }
+
   validateForm() {
-    const inputs = this.form.querySelectorAll('input, textarea');
     let isValid = true;
     let firstInvalidField = null;
 
-    inputs.forEach(input => {
+    this.fields().forEach(input => {
       const fieldIsValid = this.validateField(input);
       if (!fieldIsValid) {
         isValid = false;
@@ -365,29 +405,25 @@ class FormValidation {
   }
 
   showError(field, message) {
-    this.clearError(field);
-    
-    field.style.borderColor = '#F5C6AA';
-    
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.textContent = message;
-    errorDiv.style.cssText = `
-      color: #5E6652;
-      font-size: 0.85rem;
-      margin-top: 0.5rem;
-      font-weight: 600;
-    `;
-    
-    field.parentElement.appendChild(errorDiv);
+    const group = field.closest('.form-group');
+    const slot = group ? group.querySelector('.form-error') : null;
+
+    if (group) group.classList.add('has-error');
+    if (slot) slot.textContent = message;
+
+    field.setAttribute('aria-invalid', 'true');
+    if (slot && slot.id) field.setAttribute('aria-describedby', slot.id);
   }
 
   clearError(field) {
-    field.style.borderColor = '';
-    const errorMessage = field.parentElement.querySelector('.error-message');
-    if (errorMessage) {
-      errorMessage.remove();
-    }
+    const group = field.closest('.form-group');
+    const slot = group ? group.querySelector('.form-error') : null;
+
+    if (group) group.classList.remove('has-error');
+    if (slot) slot.textContent = '';
+
+    field.removeAttribute('aria-invalid');
+    field.removeAttribute('aria-describedby');
   }
 }
 

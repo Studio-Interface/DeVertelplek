@@ -8,6 +8,7 @@
   --mosgroen: #5E6652;
   --wit: #FFFFFF;
   --shadow: rgba(94, 102, 82, 0.1);
+  --fout: #9C4526;
   
   /* Typografie */
   --font-heading: 'Playfair Display', serif;
@@ -116,6 +117,57 @@ a {
   width: 100%;
 }
 
+/* ===== VERSTUURKNOP: VERZEND-STATUSSEN ===== */
+.btn .btn-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.btn:disabled {
+  cursor: default;
+}
+
+/* Bezig met versturen */
+.btn.is-sending,
+.btn.is-sending:hover {
+  opacity: 0.75;
+  cursor: wait;
+  transform: none;
+}
+
+.btn.is-sending .btn-label::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: var(--wit);
+  border-radius: 50%;
+  animation: btnSpin 0.7s linear infinite;
+}
+
+/* Verzonden: bevestiging met vinkje */
+.btn.is-sent,
+.btn.is-sent:hover {
+  background: var(--mosgroen);
+  color: var(--wit);
+  box-shadow: 0 4px 20px rgba(94, 102, 82, 0.3);
+  transform: none;
+}
+
+.btn.is-sent .btn-label::before {
+  content: '\2713';
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+@keyframes btnSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ===== NAVIGATION ===== */
 .nav {
   background: transparent;
@@ -171,6 +223,10 @@ body.menu-open {
 }
 
 
+.logo {
+  margin-left: -2rem;
+}
+
 .logo img {
   width: 180%;
   max-width: 350px;
@@ -185,7 +241,7 @@ body.menu-open {
 .nav-menu {
   display: flex;
   list-style: none;
-  gap: 2.5rem;
+  gap: 2rem;
   align-items: center;
 }
 
@@ -450,6 +506,12 @@ body.menu-open {
   background: linear-gradient(135deg, var(--wit) 0%, var(--zandbeige) 100%);
 }
 
+/* ===== WAAR WE VOOR STAAN ===== */
+.waarden {
+  padding: var(--section-padding);
+  background: var(--wit);
+}
+
 .team-content {
   display: flex;
   flex-direction: column;
@@ -487,20 +549,9 @@ body.menu-open {
 }
 
 .team-member-small {
-  /* background: var(--wit); */
-  border-radius: 20px;
-  overflow: hidden;
-  /* box-shadow: 0 5px 25px var(--shadow); */
-  transition: var(--transition);
   display: flex;
-  /* flex-direction: column; */
   align-items: center;
   gap: 1.5rem;
-}
-
-.team-member-small:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 35px var(--shadow);
 }
 
 .team-photo-small {
@@ -993,6 +1044,64 @@ body.menu-open {
   min-height: 120px;
 }
 
+/* Foutmelding per veld: ruimte staat vast, dus de layout springt niet */
+.form-error {
+  display: block;
+  min-height: 1.15rem;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--fout);
+}
+
+.form-group.has-error input,
+.form-group.has-error textarea {
+  border-color: var(--fout);
+}
+
+.form-group.has-error input:focus,
+.form-group.has-error textarea:focus {
+  border-color: var(--fout);
+  box-shadow: 0 0 0 3px rgba(156, 69, 38, 0.2);
+}
+
+/* Honeypot: onzichtbaar voor bezoekers, wel invulbaar voor bots */
+.form-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Statusmelding onder het formulier */
+.form-status {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-weight: 600;
+  line-height: 1.5;
+  border-radius: 12px;
+}
+
+.form-status.is-visible {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.form-status.success {
+  background: var(--mosgroen);
+  color: var(--wit);
+}
+
+.form-status.error {
+  background: var(--fout);
+  color: var(--wit);
+}
+
 /* ===== FOOTER ===== */
 .footer {
   background: var(--mosgroen);
@@ -1060,24 +1169,311 @@ body.menu-open {
   opacity: 0.7;
 }
 
-/* ===== RESPONSIVE ===== */
+/* ===== DECORATIEVE VORMEN =====
+   Eén vormtaal door de hele site: afgeronde tegels (zoals de kaarten),
+   zachte cirkels (zoals in de hero), dunne okergele lijnen en een
+   stippenraster in mosgroen. Altijd achter de content en laag in opacity. */
+
+:root {
+  --stippen: radial-gradient(circle, var(--mosgroen) 1.5px, transparent 2px);
+}
+
+/* Secties als canvas: vormen mogen buiten de rand vallen zonder scrollbalk */
+.about,
+.team,
+.waarden,
+.werkwijze,
+.tarieven,
+.contact {
+  position: relative;
+  overflow: hidden;
+}
+
+.about > .container,
+.team > .container,
+.waarden > .container,
+.werkwijze > .container,
+.tarieven > .container,
+.contact > .container {
+  position: relative;
+  z-index: 1;
+}
+
+.about::before,
+.about::after,
+.team::before,
+.team::after,
+.werkwijze::before,
+.werkwijze::after,
+.tarieven::before,
+.contact::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* --- Over ons --- */
+.about::before {
+  width: 280px;
+  height: 280px;
+  top: 6rem;
+  right: -120px;
+  border-radius: 50%;
+  background: var(--perzik);
+  opacity: 0.2;
+}
+
+.about::after {
+  width: 90px;
+  height: 90px;
+  bottom: 4rem;
+  left: -30px;
+  border-radius: 50%;
+  background: var(--okergeel);
+  opacity: 0.2;
+}
+
+/* Tegel achter de hoek van de missietekst */
+.about .text-block {
+  position: relative;
+  isolation: isolate;
+}
+
+.about .text-block:first-child::before {
+  content: '';
+  position: absolute;
+  top: -1.5rem;
+  left: -2rem;
+  width: 120px;
+  height: 120px;
+  border-radius: 28px;
+  background: var(--zandbeige);
+  transform: rotate(-8deg);
+  z-index: -1;
+}
+
+/* Open okergele tegel als tegenhanger rechtsonder bij de visie */
+.about .text-block:last-child::after {
+  content: '';
+  position: absolute;
+  bottom: -1.5rem;
+  right: -1rem;
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--okergeel);
+  border-radius: 20px;
+  transform: rotate(12deg);
+  opacity: 0.7;
+  z-index: -1;
+}
+
+/* Groot citaatteken achter de quote */
+.about-quote {
+  position: relative;
+  isolation: isolate;
+}
+
+.about-quote::before {
+  content: '\201C';
+  position: absolute;
+  top: -2.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-heading);
+  font-size: 7rem;
+  line-height: 1;
+  color: var(--okergeel);
+  opacity: 0.3;
+  z-index: -1;
+}
+
+/* --- Ons team --- */
+.team::before {
+  width: 160px;
+  height: 120px;
+  top: 4rem;
+  left: 4%;
+  background-image: var(--stippen);
+  background-size: 20px 20px;
+  opacity: 0.18;
+}
+
+.team::after {
+  width: 340px;
+  height: 340px;
+  bottom: -170px;
+  right: -120px;
+  border: 2px solid var(--okergeel);
+  border-radius: 50%;
+  opacity: 0.45;
+}
+
+/* --- Waar we voor staan: gelaagde tegels achter de kaarten --- */
+.waarden .team-text-block {
+  position: relative;
+}
+
+.waarden .team-text-block:first-child::before,
+.waarden .team-text-block:last-child::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.waarden .team-text-block:first-child::before {
+  top: -1.25rem;
+  left: -1.25rem;
+  width: 120px;
+  height: 120px;
+  border-radius: 24px;
+  background: var(--perzik);
+  opacity: 0.55;
+  transform: rotate(-6deg);
+}
+
+.waarden .team-text-block:last-child::after {
+  bottom: -1.25rem;
+  right: -1.25rem;
+  width: 90px;
+  height: 90px;
+  border: 2px solid var(--okergeel);
+  border-radius: 20px;
+  transform: rotate(10deg);
+}
+
+/* --- Werkwijze --- */
+.werkwijze::before {
+  width: 260px;
+  height: 260px;
+  top: -80px;
+  left: -80px;
+  border-radius: 48px;
+  background: var(--wit);
+  opacity: 0.45;
+  transform: rotate(18deg);
+}
+
+.werkwijze::after {
+  width: 180px;
+  height: 140px;
+  bottom: 3rem;
+  right: 3rem;
+  background-image: var(--stippen);
+  background-size: 20px 20px;
+  opacity: 0.18;
+}
+
+/* --- Tarieven --- */
+.tarieven::before {
+  width: 220px;
+  height: 220px;
+  top: 50%;
+  left: -110px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: var(--okergeel);
+  opacity: 0.12;
+}
+
+/* --- Contact: verschoven tegel achter het formulier geeft diepte --- */
+.contact::before {
+  width: 160px;
+  height: 120px;
+  top: 5rem;
+  left: 6%;
+  background-image: var(--stippen);
+  background-size: 20px 20px;
+  opacity: 0.18;
+}
+
+.contact-form-wrapper {
+  position: relative;
+}
+
+.contact-form-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 1.25rem -1.25rem -1.25rem 1.25rem;
+  border-radius: 20px;
+  background: var(--mosgroen);
+  opacity: 0.75;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Mobiel: rustiger, kleinere verschuivingen die binnen de marge blijven */
 @media (max-width: 768px) {
-  :root {
-    --section-padding: var(--section-padding-mobile);
+  .team::before,
+  .werkwijze::after,
+  .contact::before,
+  .about::after {
+    display: none;
   }
-  
-  .container {
-    padding: 0 1.5rem;
+
+  .about::before {
+    width: 180px;
+    height: 180px;
+    right: -100px;
   }
-  
-  /* Navigation */
+
+  .team::after {
+    width: 220px;
+    height: 220px;
+    bottom: -110px;
+    right: -90px;
+  }
+
+  .about .text-block:first-child::before {
+    left: -1rem;
+    width: 90px;
+    height: 90px;
+    border-radius: 22px;
+  }
+
+  .about .text-block:last-child::after {
+    right: -0.5rem;
+    width: 60px;
+    height: 60px;
+  }
+
+  .about-quote::before {
+    font-size: 5rem;
+    top: -2rem;
+  }
+
+  .waarden .team-text-block:first-child::before,
+  .waarden .team-text-block:last-child::after {
+    width: 70px;
+    height: 70px;
+  }
+
+  .waarden .team-text-block:first-child::before {
+    top: -0.75rem;
+    left: -0.75rem;
+  }
+
+  .waarden .team-text-block:last-child::after {
+    bottom: -0.75rem;
+    right: -0.75rem;
+  }
+
+  .contact-form-wrapper::before {
+    inset: 0.75rem -0.75rem -0.75rem 0.75rem;
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+/* Hamburgermenu zodra de volledige menubalk niet meer naast het logo past */
+@media (max-width: 1200px) {
   .mobile-toggle {
     display: flex;
   }
   
-  .logo img {
-    width: 160%;
-    max-width: 280px;
+  /* Zonder menubalk ernaast hoort het logo gewoon in de marge te staan */
+  .logo {
+    margin-left: 0;
   }
   
   /* Logo en hamburger blijven boven het uitgeschoven menu liggen */
@@ -1127,6 +1523,22 @@ body.menu-open {
   
   .nav-link::after {
     background: var(--okergeel);
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --section-padding: var(--section-padding-mobile);
+  }
+  
+  .container {
+    padding: 0 1.5rem;
+  }
+  
+  /* Navigation */
+  .logo img {
+    width: 160%;
+    max-width: 280px;
   }
   
   /* Hero */
@@ -1179,7 +1591,7 @@ body.menu-open {
   
   .team-photo-small {
     width: 150px;
-    height: 150px;
+    height: auto;
   }
   
   .team-photo-small .photo-placeholder svg {
@@ -1256,7 +1668,7 @@ body.menu-open {
   
   .team-photo-small {
     width: 140px;
-    height: 140px;
+    height: auto;
   }
   
   .team-photo-small .photo-placeholder svg {
@@ -1266,6 +1678,20 @@ body.menu-open {
   
   .team-info-small h4 {
     font-size: 1.25rem;
+  }
+}
+
+/* Zodra de footerkolommen onder elkaar vallen: alles gecentreerd */
+@media (max-width: 600px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    text-align: center;
+  }
+
+  .footer-section h3,
+  .footer-section h4 {
+    justify-content: center;
   }
 }
 
