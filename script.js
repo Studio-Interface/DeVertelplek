@@ -225,6 +225,64 @@ class AnimationObserver {
   }
 }
 
+// ===== CONTACT FORM HANDLING =====
+// Verstuurt het formulier naar Web3Forms zonder de pagina te verlaten.
+// De access key staat als verborgen veld in index.html, zodat het formulier
+// ook werkt wanneer JavaScript niet laadt.
+const contactForm = document.getElementById('contactForm');
+
+if (contactForm) {
+  const submitBtn = contactForm.querySelector('button[type="submit"]');
+
+  const originalText = submitBtn.textContent;
+  let resetTimer = null;
+
+  // Knop terug in de normale staat
+  const resetButton = () => {
+    submitBtn.textContent = originalText;
+    submitBtn.classList.remove('is-sending', 'is-sent');
+    submitBtn.disabled = false;
+  };
+
+  contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    clearTimeout(resetTimer);
+
+    const formData = new FormData(contactForm);
+
+    submitBtn.textContent = 'Bezig met versturen...';
+    submitBtn.classList.add('is-sending');
+    submitBtn.classList.remove('is-sent');
+    submitBtn.disabled = true;
+
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Bevestiging: knop wordt groen met een vinkje, formulier leeg
+        contactForm.reset();
+        submitBtn.textContent = 'Bericht verzonden';
+        submitBtn.classList.remove('is-sending');
+        submitBtn.classList.add('is-sent');
+
+        resetTimer = setTimeout(resetButton, 5000);
+      } else {
+        alert('Fout: ' + data.message);
+        resetButton();
+      }
+    } catch (error) {
+      alert('Er ging iets mis. Probeer het later opnieuw.');
+      resetButton();
+    }
+  });
+}
+
 // ===== SCROLL TO TOP =====
 class ScrollToTop {
   constructor() {
