@@ -117,57 +117,6 @@ a {
   width: 100%;
 }
 
-/* ===== VERSTUURKNOP: VERZEND-STATUSSEN ===== */
-.btn .btn-label {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-}
-
-.btn:disabled {
-  cursor: default;
-}
-
-/* Bezig met versturen */
-.btn.is-sending,
-.btn.is-sending:hover {
-  opacity: 0.75;
-  cursor: wait;
-  transform: none;
-}
-
-.btn.is-sending .btn-label::before {
-  content: '';
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: var(--wit);
-  border-radius: 50%;
-  animation: btnSpin 0.7s linear infinite;
-}
-
-/* Verzonden: bevestiging met vinkje */
-.btn.is-sent,
-.btn.is-sent:hover {
-  background: var(--mosgroen);
-  color: var(--wit);
-  box-shadow: 0 4px 20px rgba(94, 102, 82, 0.3);
-  transform: none;
-}
-
-.btn.is-sent .btn-label::before {
-  content: '\2713';
-  font-size: 1.15em;
-  line-height: 1;
-}
-
-@keyframes btnSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* ===== NAVIGATION ===== */
 .nav {
   background: transparent;
@@ -546,6 +495,29 @@ body.menu-open {
   color: var(--mosgroen);
   line-height: 1.8;
   margin-bottom: 1.25rem;
+}
+
+/* Tekstblok onder de teamfoto's */
+.team-intro {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.team-intro h3 {
+  color: var(--mosgroen);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.team-intro p {
+  color: var(--mosgroen);
+  line-height: 1.8;
+  margin-bottom: 1.25rem;
+}
+
+.team-intro p:last-child {
+  margin-bottom: 0;
 }
 
 .team-member-small {
@@ -1044,28 +1016,6 @@ body.menu-open {
   min-height: 120px;
 }
 
-/* Foutmelding per veld: ruimte staat vast, dus de layout springt niet */
-.form-error {
-  display: block;
-  min-height: 1.15rem;
-  margin-top: 0.4rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--fout);
-}
-
-.form-group.has-error input,
-.form-group.has-error textarea {
-  border-color: var(--fout);
-}
-
-.form-group.has-error input:focus,
-.form-group.has-error textarea:focus {
-  border-color: var(--fout);
-  box-shadow: 0 0 0 3px rgba(156, 69, 38, 0.2);
-}
-
 /* Honeypot: onzichtbaar voor bezoekers, wel invulbaar voor bots */
 .form-honeypot {
   position: absolute;
@@ -1074,32 +1024,6 @@ body.menu-open {
   height: 1px;
   opacity: 0;
   pointer-events: none;
-}
-
-/* Statusmelding onder het formulier */
-.form-status {
-  margin: 0;
-  padding: 0;
-  text-align: center;
-  font-weight: 600;
-  line-height: 1.5;
-  border-radius: 12px;
-}
-
-.form-status.is-visible {
-  margin-top: 0.5rem;
-  padding: 1rem;
-  animation: fadeInUp 0.3s ease-out;
-}
-
-.form-status.success {
-  background: var(--mosgroen);
-  color: var(--wit);
-}
-
-.form-status.error {
-  background: var(--fout);
-  color: var(--wit);
 }
 
 /* ===== FOOTER ===== */
@@ -1167,6 +1091,11 @@ body.menu-open {
 .footer-bottom p {
   margin: 0;
   opacity: 0.7;
+}
+
+.footer-bottom .footer-kvk {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
 }
 
 /* ===== DECORATIEVE VORMEN =====
